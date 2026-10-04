@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { useForm, ValidationError } from '@formspree/react'
 import { profile, nav, stats, skills, experience, projects, awards, marquee } from './data'
-import { reduced, initScene, initCursor, initHover, initScroll, scrollToId, playIntro, initReveals } from './fx'
+import { reduced, initCursor, initHover, initScroll, scrollToId, playIntro, initReveals } from './fx'
 
 /* ---------- icons ---------- */
 const Icon = ({ d, ...p }) => (
@@ -18,13 +18,15 @@ const Word = ({ children }) => (
   <span className="word">{children.split(' ').map((w, i) => <span key={i}>{w}&nbsp;</span>)}</span>
 )
 
-function SectionHead({ n, title }) {
+function Section({ id, n, title, children }) {
   return (
-    <h2 className="sec-head">
-      <span className="sec-n">{n}</span>
-      <Word>{title}</Word>
-      <span className="sec-line" />
-    </h2>
+    <section id={id} className="sec">
+      <h2 className="sec-head">
+        <span className="sec-n">{n}</span>
+        <Word>{title}</Word>
+      </h2>
+      <div className="sec-body">{children}</div>
+    </section>
   )
 }
 
@@ -37,11 +39,11 @@ function Preloader({ onDone }) {
     if (reduced) { el.current.remove(); onDone(); return }
     const o = { v: 0 }
     gsap.timeline()
-      .to(o, { v: 100, duration: 1.3, ease: 'power2.inOut', onUpdate: () => { num.current.textContent = Math.round(o.v) } })
-      .to('.pre-bar', { scaleX: 1, duration: 1.3, ease: 'power2.inOut' }, 0)
+      .to(o, { v: 100, duration: 1.2, ease: 'power2.inOut', onUpdate: () => { num.current.textContent = Math.round(o.v) } })
+      .to('.pre-bar', { scaleX: 1, duration: 1.2, ease: 'power2.inOut' }, 0)
       .to('.pre-inner', { y: -30, opacity: 0, duration: 0.5, ease: 'power2.in' }, '+=0.1')
       .to(el.current, { yPercent: -100, duration: 1, ease: 'expo.inOut' }, '-=0.15')
-      .add(onDone, '-=0.75')
+      .add(onDone, '-=0.7')
       .set(el.current, { display: 'none' })
   }, [])
   return (
@@ -75,11 +77,8 @@ function MarketViz() {
   }, [])
   return (
     <svg className="viz viz-market" viewBox="0 0 400 140" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="mcg" x1="0" x2="1"><stop offset="0" stopColor="#ffb547" stopOpacity=".05" /><stop offset="1" stopColor="#ffb547" stopOpacity=".18" /></linearGradient>
-      </defs>
       {[35, 70, 105].map((y) => <line key={y} x1="0" x2="400" y1={y} y2={y} className="grid" />)}
-      <rect x="264" y="0" width="136" height="140" fill="url(#mcg)" />
+      <rect x="264" y="0" width="136" height="140" className="band" />
       <line x1="264" x2="264" y1="0" y2="140" className="now" />
       {fans.map((p, i) => <path key={i} d={p} pathLength="1" className="draw fan" />)}
       <path d={hist} pathLength="1" className="draw hist" />
@@ -174,26 +173,36 @@ function CopyEmail() {
   return <button className="copy" onClick={copy} type="button">{copied ? 'Copied ✓' : 'Copy'}</button>
 }
 
+const Socials = () => (
+  <ul className="socials">
+    <li><a href={profile.github} target="_blank" rel="noopener" aria-label="GitHub" data-magnetic><Icon d={GH} /></a></li>
+    <li><a href={profile.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn" data-magnetic><Icon d={LI} /></a></li>
+    <li><a href={`mailto:${profile.email}`} aria-label="Email" data-magnetic><Icon d={MAIL} /></a></li>
+    <li><a href={profile.phoneHref} aria-label="Phone" data-magnetic><Icon d={PHONE} /></a></li>
+  </ul>
+)
+
 /* ---------- app ---------- */
 export default function App() {
-  const canvas = useRef(), dot = useRef(), ring = useRef(), bar = useRef()
-  const [active, setActive] = useState('about')
+  const dot = useRef(), ring = useRef(), bar = useRef()
+  const [active, setActive] = useState('')
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const stopScene = initScene(canvas.current)
     initCursor(dot.current, ring.current)
     initHover()
     const io = new IntersectionObserver(
       (es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)),
       { rootMargin: '-40% 0px -55% 0px' },
     )
-    document.querySelectorAll('main section[id]').forEach((s) => io.observe(s))
+    document.querySelectorAll('section[id]').forEach((s) => io.observe(s))
     const onScroll = () => {
       const p = scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)
       bar.current.style.transform = `scaleX(${p})`
+      setScrolled(scrollY > 24)
     }
     addEventListener('scroll', onScroll, { passive: true })
-    return () => { stopScene(); io.disconnect(); removeEventListener('scroll', onScroll) }
+    return () => { io.disconnect(); removeEventListener('scroll', onScroll) }
   }, [])
 
   const start = () => { initScroll(); playIntro(); initReveals() }
@@ -202,70 +211,81 @@ export default function App() {
   return (
     <>
       <Preloader onDone={start} />
-      <canvas id="scene" ref={canvas} aria-hidden="true" />
       <div className="spotlight" aria-hidden="true" />
       <div className="progress" ref={bar} aria-hidden="true" />
       <div className="cursor-dot" ref={dot} aria-hidden="true" />
       <div className="cursor-ring" ref={ring} aria-hidden="true" />
       <a className="skip" href="#about">Skip to content</a>
 
-      <div className="layout">
-        {/* ---------- sidebar ---------- */}
-        <header className="side">
-          <div>
-            <p className="eyebrow" data-intro><span className="pulse" /> Open to opportunities</p>
-            <h1 className="name" aria-label={profile.name}>
+      <header className={`topbar${scrolled ? ' is-scrolled' : ''}`}>
+        <div className="wrap topbar-in">
+          <a href="#top" className="logo" onClick={go('top')}>Yash Patil<span>.</span></a>
+          <nav aria-label="Sections">
+            <ul className="nav">
+              {nav.map(([id, label]) => (
+                <li key={id}><a href={`#${id}`} onClick={go(id)} className={active === id ? 'active' : ''}>{label}</a></li>
+              ))}
+            </ul>
+          </nav>
+          <a className="btn btn-solid btn-sm" href={profile.resume} target="_blank" rel="noopener" data-magnetic>
+            Résumé <Arrow />
+          </a>
+        </div>
+      </header>
+
+      <main>
+        {/* ---------- hero ---------- */}
+        <section id="top" className="hero">
+          <div className="hero-blob" aria-hidden="true" />
+          <div className="wrap">
+            <p className="eyebrow" data-intro><span className="pulse" /> Open to opportunities · India</p>
+            <h1 className="hero-name" aria-label={profile.name}>
               {['Yash', 'Patil'].map((w) => (
                 <span className="line" key={w} aria-hidden="true">
                   {[...w].map((ch, i) => <span className="ch" key={i}>{ch}</span>)}
                 </span>
               ))}
             </h1>
-            <p className="role" data-intro>Data Science · ML · Backend Engineer</p>
-            <p className="tagline" data-intro>
-              I build models that <em>forecast markets</em> — and guardrails for the <em>AI agents</em> that trade them.
-            </p>
-
-            <nav className="nav" aria-label="Sections" data-intro>
-              <ul>
-                {nav.map(([id, label], i) => (
-                  <li key={id}>
-                    <a href={`#${id}`} onClick={go(id)} className={active === id ? 'active' : ''}>
-                      <span className="nav-n">0{i + 1}</span>
-                      <span className="nav-line" />
-                      <span className="nav-label">{label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div className="hero-grid">
+              <p className="hero-tagline" data-intro>
+                I build models that <span className="hl">forecast markets</span> — and guardrails for
+                the <span className="hl">AI agents</span> that trade them.
+              </p>
+              <div className="hero-side" data-intro>
+                <p className="role">Data Science · ML · Backend Engineer</p>
+                <div className="hero-ctas">
+                  <a className="btn btn-solid" href="#projects" onClick={go('projects')} data-magnetic>View work <Arrow /></a>
+                  <a className="btn" href={profile.resume} target="_blank" rel="noopener" data-magnetic>Résumé <Arrow /></a>
+                </div>
+                <Socials />
+              </div>
+            </div>
+            <dl className="hero-meta" data-intro>
+              <div><dt>Previously</dt><dd>Backend Developer Intern, Jio Platforms</dd></div>
+              <div><dt>Research</dt><dd>SA-PSO — accepted at ADCIS 2026 (Springer)</dd></div>
+              <div><dt>Studying</dt><dd>B.Tech CSE (Data Science), MUJ ’27</dd></div>
+            </dl>
           </div>
+        </section>
 
-          <div className="side-foot" data-intro>
-            <a className="btn btn-solid" href={profile.resume} target="_blank" rel="noopener" data-magnetic>
-              Résumé <Arrow />
-            </a>
-            <ul className="socials">
-              <li><a href={profile.github} target="_blank" rel="noopener" aria-label="GitHub" data-magnetic><Icon d={GH} /></a></li>
-              <li><a href={profile.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn" data-magnetic><Icon d={LI} /></a></li>
-              <li><a href={`mailto:${profile.email}`} aria-label="Email" data-magnetic><Icon d={MAIL} /></a></li>
-              <li><a href={profile.phoneHref} aria-label="Phone" data-magnetic><Icon d={PHONE} /></a></li>
-            </ul>
+        <div className="marquee" aria-hidden="true">
+          <div className="marquee-track">
+            <div className="marquee-inner">
+              {[...marquee, ...marquee].map((m, i) => <span key={i}>{m}<i>✦</i></span>)}
+            </div>
           </div>
-        </header>
+        </div>
 
-        {/* ---------- content ---------- */}
-        <main>
-          <section id="about">
-            <SectionHead n="01" title="About" />
-            <div className="prose">
-              <p>
+        <div className="wrap">
+          <Section id="about" n="01" title="About">
+            <div className="prose" data-reveal>
+              <p className="lead">
                 I'm a Computer Science (Data Science) undergrad at <strong>Manipal University Jaipur</strong> who
-                likes problems where the math has to survive contact with production. I've built time-series and
-                Monte Carlo pipelines that put a number on market risk, published research on swarm-based feature
-                selection, and shipped backend services at <strong>Jio Platforms</strong>.
+                likes problems where the math has to survive contact with production.
               </p>
               <p>
+                I've built time-series and Monte Carlo pipelines that put a number on market risk, published research
+                on swarm-based feature selection, and shipped backend services at <strong>Jio Platforms</strong>.
                 Lately I've been focused on a question that's arriving fast: what happens when autonomous AI agents
                 can move money? <strong>Vanguard</strong>, my runtime authorization layer for financial agents, is my
                 answer. Outside of coursework I co-founded a technology startup building AI-driven products and
@@ -304,18 +324,9 @@ export default function App() {
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
 
-          <div className="marquee" aria-hidden="true">
-            <div className="marquee-track">
-              <div className="marquee-inner">
-                {[...marquee, ...marquee].map((m, i) => <span key={i}>{m}<i>✦</i></span>)}
-              </div>
-            </div>
-          </div>
-
-          <section id="experience">
-            <SectionHead n="02" title="Experience" />
+          <Section id="experience" n="02" title="Experience">
             <ol className="xp-list">
               {experience.map((x) => (
                 <li className="xp" key={x.org} data-reveal>
@@ -329,10 +340,9 @@ export default function App() {
                 </li>
               ))}
             </ol>
-          </section>
+          </Section>
 
-          <section id="projects">
-            <SectionHead n="03" title="Selected Projects" />
+          <Section id="projects" n="03" title="Selected Projects">
             <div className="projects">
               {projects.map((p, i) => {
                 const Viz = VIZ[p.viz]
@@ -360,10 +370,9 @@ export default function App() {
             <a className="more" href={profile.github} target="_blank" rel="noopener" data-reveal>
               More on GitHub <Arrow />
             </a>
-          </section>
+          </Section>
 
-          <section id="research">
-            <SectionHead n="04" title="Research" />
+          <Section id="research" n="04" title="Research">
             <article className="paper card" data-reveal>
               <div className="paper-badges">
                 <span className="badge badge-accent">Accepted</span>
@@ -379,10 +388,9 @@ export default function App() {
                 scales to large feature spaces without evaluating every candidate subset the expensive way.
               </p>
             </article>
-          </section>
+          </Section>
 
-          <section id="awards">
-            <SectionHead n="05" title="Awards & Leadership" />
+          <Section id="awards" n="05" title="Awards & Leadership">
             <ul className="awards">
               {awards.map((a) => (
                 <li className="award card" key={a.where} data-reveal>
@@ -392,10 +400,9 @@ export default function App() {
                 </li>
               ))}
             </ul>
-          </section>
+          </Section>
 
-          <section id="contact">
-            <SectionHead n="06" title="Contact" />
+          <Section id="contact" n="06" title="Contact">
             <p className="contact-lead" data-reveal>
               Have a role, a hard problem, or a messy dataset? <em>Let's talk.</em>
             </p>
@@ -411,14 +418,15 @@ export default function App() {
               </div>
             </div>
             <div data-reveal><ContactForm /></div>
-          </section>
+          </Section>
 
           <footer className="foot">
-            <p>Designed &amp; built by Yash Patil — React, Three.js &amp; GSAP.</p>
+            <p>Designed &amp; built by Yash Patil — React &amp; GSAP.</p>
+            <Socials />
             <p>© {new Date().getFullYear()}</p>
           </footer>
-        </main>
-      </div>
+        </div>
+      </main>
     </>
   )
 }
