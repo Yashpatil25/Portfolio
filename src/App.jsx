@@ -36,13 +36,12 @@ const Tags = ({ list }) => <ul className="tags">{list.map((t) => <li key={t}>{t}
 function Preloader({ onDone }) {
   const el = useRef(), num = useRef()
   useEffect(() => {
-    if (reduced) { el.current.remove(); onDone(); return }
     const o = { v: 0 }
     gsap.timeline()
       .to(o, { v: 100, duration: 1.2, ease: 'power2.inOut', onUpdate: () => { num.current.textContent = Math.round(o.v) } })
       .to('.pre-bar', { scaleX: 1, duration: 1.2, ease: 'power2.inOut' }, 0)
       .to('.pre-inner', { y: -30, opacity: 0, duration: 0.5, ease: 'power2.in' }, '+=0.1')
-      .to(el.current, { yPercent: -100, duration: 1, ease: 'expo.inOut' }, '-=0.15')
+      .to(el.current, reduced ? { opacity: 0, duration: 0.8 } : { yPercent: -100, duration: 1.1, ease: 'expo.inOut' }, '-=0.15')
       .add(onDone, '-=0.7')
       .set(el.current, { display: 'none' })
   }, [])

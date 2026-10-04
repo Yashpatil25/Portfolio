@@ -62,8 +62,7 @@ export function initHover() {
 let lenis = null
 export function initScroll() {
   document.documentElement.classList.remove('is-loading')
-  if (reduced) return
-  lenis = new Lenis({ lerp: 0.1 })
+  lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.9 })
   lenis.on('scroll', ScrollTrigger.update)
   gsap.ticker.add((t) => lenis.raf(t * 1000))
   gsap.ticker.lagSmoothing(0)
@@ -73,31 +72,32 @@ export function scrollToId(id) {
   const el = document.getElementById(id)
   if (!el) return
   if (lenis) lenis.scrollTo(el, { offset: id === 'top' ? 0 : -72, duration: 1.4 })
-  else el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' })
+  else el.scrollIntoView({ behavior: 'smooth' })
 }
 
 /* ---------- intro + scroll reveals ---------- */
+// Reduced-motion visitors (incl. Windows with "Animation effects" off) get soft opacity fades instead of movement.
+const rise = (y) => (reduced ? 0 : y)
+
 export function playIntro() {
-  if (reduced) return
   gsap.timeline()
-    .from('.hero-name .ch', { yPercent: 115, duration: 1.2, ease: 'expo.out', stagger: 0.04 })
-    .from('[data-intro]', { y: 28, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.08 }, '-=0.9')
-    .from('.hl', { backgroundSize: '0% 100%', duration: 1.1, ease: 'power3.inOut', stagger: 0.25 }, '-=0.5')
-    .from('.topbar', { yPercent: -100, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.3)
+    .from('.hero-name .ch', { yPercent: rise(110), opacity: reduced ? 0 : 1, duration: 1.4, ease: 'expo.out', stagger: 0.045 })
+    .from('[data-intro]', { y: rise(24), opacity: 0, duration: 1.2, ease: 'power2.out', stagger: 0.1 }, '-=1')
+    .from('.hl', { backgroundSize: '0% 100%', duration: 1.3, ease: 'power2.inOut', stagger: 0.3 }, '-=0.6')
+    .from('.topbar', { yPercent: -rise(100), opacity: 0, duration: 1, ease: 'power2.out' }, 0.3)
 }
 
 export function initReveals() {
-  if (reduced) return
   gsap.utils.toArray('.sec-head .word').forEach((el) => {
     gsap.from(el.children, {
-      yPercent: 110, duration: 1, ease: 'expo.out', stagger: 0.06,
+      yPercent: rise(110), opacity: reduced ? 0 : 1, duration: 1.2, ease: 'expo.out', stagger: 0.07,
       scrollTrigger: { trigger: el, start: 'top 90%' },
     })
   })
   gsap.utils.toArray('[data-reveal]').forEach((el) => {
     gsap.from(el, {
-      y: 40, opacity: 0, duration: 1, ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 90%' },
+      y: rise(30), opacity: 0, duration: 1.3, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 92%' },
     })
   })
   gsap.utils.toArray('[data-count]').forEach((el) => {
