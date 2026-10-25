@@ -8,14 +8,16 @@ export const profile = {
   resume: `${import.meta.env.BASE_URL}Yash_Patil_Resume.pdf`,
 }
 
-export const nav = [
-  ['about', 'About'],
-  ['experience', 'Experience'],
-  ['projects', 'Projects'],
-  ['research', 'Research'],
-  ['awards', 'Awards'],
-  ['contact', 'Contact'],
-]
+// What the pixel me says in each section: [before, highlighted, after]
+export const says = {
+  top: ["Hi, I'm ", 'Yash', ". Scroll down and I'll show you around."],
+  about: ['Short version: I turn ', 'data into decisions', '.'],
+  commodity: ['First up: forecasting ', 'commodity prices', ' and pricing the risk.'],
+  vanguard: ['This one stops AI agents from ', 'paying the wrong person', '.'],
+  tarang: ['Last one: ', 'carbon credits', ', checked by ML and traded on-chain.'],
+  experience: ["I've shipped ", 'production code', ' too.'],
+  contact: ['Got a role in mind? ', 'Say hi', '.'],
+}
 
 export const stats = [
   { value: 2, label: 'Industry roles' },
@@ -60,7 +62,9 @@ export const experience = [
 
 export const projects = [
   {
+    id: 'commodity',
     viz: 'market',
+    url: 'github.com/Yashpatil25/Maze',
     title: 'Commodity Research Prediction System',
     kicker: 'Quant · Forecasting · Risk',
     points: [
@@ -72,7 +76,9 @@ export const projects = [
     repo: 'https://github.com/Yashpatil25/Maze',
   },
   {
+    id: 'vanguard',
     viz: 'vanguard',
+    url: 'github.com/Yashpatil25/Vanguard',
     title: 'Vanguard',
     kicker: 'Intent-aware security for autonomous financial agents',
     points: [
@@ -84,7 +90,9 @@ export const projects = [
     repo: 'https://github.com/Yashpatil25/Vanguard',
   },
   {
+    id: 'tarang',
     viz: 'chain',
+    url: 'github.com/Yashpatil25/marketplace-platform',
     title: 'Tarang',
     kicker: 'Carbon-credit verification platform',
     points: [
@@ -97,11 +105,10 @@ export const projects = [
   },
 ]
 
-export const awards = [
-  { big: 'Top Team', text: 'Among 120+ shortlisted teams', where: 'Deloitte Capstone Project Challenge 2025' },
-  { big: '2nd', text: 'Place overall', where: 'Avinya Eco-Tech Hackathon, IIT Guwahati' },
-  { big: 'Top 5', text: 'Finalist', where: 'HackX, Manipal University Jaipur' },
-  { big: 'Co-Founder', text: 'Technology startup', where: 'Building AI-driven solutions' },
+export const highlights = [
+  { cover: 'Accepted', title: 'SA-PSO paper, ADCIS 2026', sub: 'Springer LNNS · with Dr. Shitanshu Jain, MUJ', meta: '2026', color: 'blue' },
+  { cover: 'Top team', title: 'Deloitte Capstone Project Challenge', sub: 'Among 120+ shortlisted teams', meta: '2025', color: 'ink' },
+  { cover: '2nd', title: 'Avinya Eco-Tech Hackathon', sub: 'IIT Guwahati', meta: 'Hackathon', color: 'yellow' },
+  { cover: 'Top 5', title: 'HackX', sub: 'Manipal University Jaipur', meta: 'Hackathon', color: 'lavender' },
+  { cover: 'Co-founder', title: 'Technology startup', sub: 'Building AI-driven solutions', meta: 'Startup', color: 'navy' },
 ]
-
-export const marquee = ['Time-Series Forecasting', 'Monte Carlo', 'VaR / CVaR', 'Particle Swarm Optimization', 'LLM Agents', 'Prompt-Injection Defense', 'REST APIs', 'MongoDB', 'Risk Modeling', 'Reinforcement Learning']
