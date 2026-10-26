@@ -185,7 +185,7 @@ a:hover .arrow.down { transform: translateY(2px); }
 .viz-market .grid { stroke: rgba(11, 11, 12, 0.08); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .viz-market .band { fill: rgba(34, 97, 233, 0.07); }
 .viz-market .now { stroke: var(--blue); stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
-.viz-market .draw { fill: none; stroke-dasharray: 1; stroke-dashoffset: 0; vector-effect: non-scaling-stroke; }
+.viz-market .draw { fill: none; vector-effect: non-scaling-stroke; }
 .viz-market .hist { stroke: var(--ink); stroke-width: 2; }
 .viz-market .fan { stroke: rgba(34, 97, 233, 0.5); stroke-width: 1; }
 .viz-market .lbl { font: 500 6px var(--mono); fill: var(--grey); letter-spacing: 0.08em; }

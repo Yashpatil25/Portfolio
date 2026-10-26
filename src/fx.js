@@ -60,11 +60,11 @@ export function initReveals() {
       scrollTrigger: { trigger: el, start: 'top 92%' },
     })
   })
-  gsap.utils.toArray('.viz-market .draw').forEach((p, i) => {
-    gsap.fromTo(p, { strokeDashoffset: 1 }, {
-      strokeDashoffset: 0, duration: i ? 1.4 : 1.8, delay: i ? 1 + i * 0.05 : 0, ease: 'power2.inOut',
-      scrollTrigger: { trigger: p.closest('svg'), start: 'top 85%' },
-    })
+  // history sweeps to "now" (x=264), then the Monte Carlo fan continues from the same point
+  gsap.utils.toArray('.viz-market').forEach((svg) => {
+    gsap.timeline({ scrollTrigger: { trigger: svg, start: 'top 85%' } })
+      .fromTo(svg.querySelector('.reveal'), { attr: { width: 0 } }, { attr: { width: 264 }, duration: 1.8, ease: 'power1.inOut' })
+      .to(svg.querySelector('.reveal'), { attr: { width: 400 }, duration: 1.2, ease: 'power2.out' })
   })
 }
 

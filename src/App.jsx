@@ -45,8 +45,12 @@ function MarketViz() {
       {[35, 70, 105].map((y) => <line key={y} x1="0" x2="400" y1={y} y2={y} className="grid" />)}
       <rect x="264" y="0" width="136" height="140" className="band" />
       <line x1="264" x2="264" y1="0" y2="140" className="now" />
-      {fans.map((p, i) => <path key={i} d={p} pathLength="1" className="draw fan" />)}
-      <path d={hist} pathLength="1" className="draw hist" />
+      {/* revealed by a sweeping clip, not stroke dashes: dashes break with non-scaling strokes and left gaps */}
+      <clipPath id="mkt-reveal"><rect className="reveal" width="400" height="140" /></clipPath>
+      <g clipPath="url(#mkt-reveal)">
+        {fans.map((p, i) => <path key={i} d={p} className="draw fan" />)}
+        <path d={hist} className="draw hist" />
+      </g>
       <text x="270" y="12" className="lbl">MONTE CARLO · 95% VaR</text>
       <text x="6" y="12" className="lbl">PRICE</text>
     </svg>
